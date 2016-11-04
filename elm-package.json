@@ -1,5 +1,5 @@
 {
-    "version": "1.0.0",
+    "version": "2.0.0",
     "summary": "Provides access to native `window` methods for prompting users.",
     "repository": "https://github.com/dworthen/elm-dialog.git",
     "license": "BSD3",

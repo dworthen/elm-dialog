@@ -1,53 +1,39 @@
-module Dialog exposing (confirm, alert, prompt)
+module Dialog exposing (Error(..), confirm, alert, prompt)
 
-{-| Provides access to native `window` methods for prompting users.
+{-| Provides access to native `window` modal methods (alert, confirm and prompt).
 
 # Window Dialogs
-@docs alert, confirm, prompt
+@docs Error, alert, confirm, prompt
 
 -}
+
 
 import Task exposing (Task)
 import Native.Dialog
 
 
-{-|
-
-    type Msg = AlertResponse
-
-    alert "Warning!" AlertResponse
+{-| Modals (alert, prompt and confirm) can be disabled due to "prevent this page from creating additional dialogs".
 -}
-alert : String -> msg -> Cmd msg
-alert message msg =
-    message
-        |> Native.Dialog.alert
-        |> Task.succeed
-        |> Task.perform (always msg) (always msg)
+type Error
+    = Disabled
 
 
-{-|
-
-    type Msg = ConfirmResponse Bool
-
-    confirm "Continue?" ConfirmResponse
+{-| Alerts user!
 -}
-confirm : String -> (Bool -> msg) -> Cmd msg
-confirm prompt constructor =
-    prompt
-        |> Native.Dialog.confirm
-        |> Task.succeed
-        |> Task.perform constructor constructor
+alert : String -> Task Error ()
+alert =
+    Native.Dialog.alert
 
 
-{-|
-
-    type Msg = PromptResponse String
-
-    prompt "Name:" PromptResponse
+{-| Prompt for confirmation!
 -}
-prompt : String -> (String -> msg) -> Cmd msg
-prompt message constructor =
-    message
-        |> Native.Dialog.prompt
-        |> Task.succeed
-        |> Task.perform constructor constructor
+confirm : String -> Task Error Bool
+confirm =
+    Native.Dialog.confirm
+
+
+{-| Ask for input. If user leaves input blank or selects 'Cancel' then `Nothing` is returned.
+-}
+prompt : String -> Task Error (Maybe String)
+prompt =
+    Native.Dialog.prompt
