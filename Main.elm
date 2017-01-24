@@ -1,7 +1,6 @@
 module Main exposing (..)
 
 import Html exposing (..)
-import Html.App as App
 import Task
 import Dialog
 
@@ -9,9 +8,14 @@ import Dialog
 -- MAIN
 
 
-main : Program Never
+main : Program Never String Msg
 main =
-    App.program { init = ( "Waiting", Task.perform ErrorResponse NewMsg (Dialog.prompt "Do you wish to continue") ), update = update, subscriptions = (\_ -> Sub.none), view = view }
+    Html.program
+        { init = ( "Waiting", Task.attempt processConfirmationResponse (Dialog.confirm "Do you wish to continue") )
+        , update = update
+        , subscriptions = (\_ -> Sub.none)
+        , view = view
+        }
 
 
 
@@ -28,25 +32,55 @@ type alias Model =
 
 type Msg
     = ErrorResponse Dialog.Error
-    | AlertResponse ()
+    | AlertResponse
     | Update Bool
     | NewMsg (Maybe String)
+
+
+processConfirmationResponse : Result Dialog.Error Bool -> Msg
+processConfirmationResponse result =
+    case result of
+        Err error ->
+            ErrorResponse error
+
+        Ok bool ->
+            Update bool
+
+
+processAlertResponse : Result Dialog.Error () -> Msg
+processAlertResponse result =
+    case result of
+        Err error ->
+            ErrorResponse error
+
+        Ok _ ->
+            AlertResponse
+
+
+processPromptResponse : Result Dialog.Error (Maybe String) -> Msg
+processPromptResponse result = 
+    case result of
+        Err error ->
+            ErrorResponse error
+        
+        Ok message -> 
+            NewMsg message            
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        ErrorResponse _ -> 
-            ("Error", Cmd.none)
+        ErrorResponse _ ->
+            ( "Error", Cmd.none )
 
-        AlertResponse _ -> 
-            ("Alerted", Cmd.none)
+        AlertResponse ->
+            ( "Alerted", Cmd.none )
 
         Update True ->
             -- if val then
             ( "Yes", Cmd.none )
-            -- else
-        
+
+        -- else
         Update False ->
             ( "No", Cmd.none )
 

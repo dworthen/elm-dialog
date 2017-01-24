@@ -7,7 +7,6 @@ module Dialog exposing (Error(..), confirm, alert, prompt)
 
 -}
 
-
 import Task exposing (Task)
 import Native.Dialog
 

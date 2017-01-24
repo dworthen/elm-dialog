@@ -12,7 +12,6 @@ Prompting a user for confirmation:
 
 ```
 import Html exposing (..)
-import Html.App as App
 import Dialog
 import Task
 
@@ -22,9 +21,10 @@ import Task
 
 main : Program Never
 main =
-    App.program 
-        { init = ( "Waiting", Task.perform ErrorResponse ConfirmResponse (Dialog.confirm "Do you wish to continue?") )
-        , update = update, subscriptions = (\_ -> Sub.none)
+    Html.program 
+        { init = ( "Waiting", Task.perform processConfirmationResponse <| Dialog.confirm "Do you wish to continue?" )
+        , update = update
+        , subscriptions = (\_ -> Sub.none)
         , view = view 
         }
 
@@ -35,6 +35,16 @@ main =
 type Msg
     = ErrorResponse Dialog.Error
     | ConfirmResponse Bool
+
+
+processConfirmationResponse : Result Dialog.Error Bool -> Msg
+processConfirmationResponse result =
+    case result of
+        Err error ->
+            ErrorResponse error
+
+        Ok bool ->
+            ConfirmResponse bool
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
